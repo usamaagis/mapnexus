@@ -1,377 +1,357 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <title>TECH SOCIETY - MAPNEXUS 3D Dashboard</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="utf-8"/>
+<title>TECH SOCIETY - MAPNEXUS 3D Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 
-  <script src="https://cesium.com/downloads/cesiumjs/releases/1.139.1/Build/Cesium/Cesium.js"></script>
-  <link href="https://cesium.com/downloads/cesiumjs/releases/1.139.1/Build/Cesium/Widgets/widgets.css" rel="stylesheet" />
+<script src="https://cesium.com/downloads/cesiumjs/releases/1.139.1/Build/Cesium/Cesium.js"></script>
+<link href="https://cesium.com/downloads/cesiumjs/releases/1.139.1/Build/Cesium/Widgets/widgets.css" rel="stylesheet"/>
 
-  <style>
-    html, body, #cesiumContainer {
-      width: 100%;
-      height: 100%;
-      margin: 0;
-      padding: 0;
-      overflow: hidden;
-      font-family: Arial, sans-serif;
-    }
+<style>
 
-    .topbar {
-      position: absolute;
-      top: 15px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 10;
-      background: rgba(20, 20, 20, 0.82);
-      color: #fff;
-      padding: 12px 24px;
-      border-radius: 10px;
-      text-align: center;
-      min-width: 280px;
-      box-shadow: 0 4px 14px rgba(0,0,0,0.25);
-    }
-
-    .topbar h1 {
-      margin: 0;
-      font-size: 24px;
-      font-weight: 600;
-      letter-spacing: 1px;
-    }
-
-    .topbar p {
-      margin: 4px 0 0 0;
-      font-size: 12px;
-      font-weight: 400;
-      opacity: 0.9;
-    }
-
-   .control-panel {
-  position: absolute;
-  top: 15px;
-  left: 15px;
-  z-index: 10;
-  background: rgba(255,255,255,0.92);
-  padding: 6px;
-  border-radius: 6px;
-  min-width: 70px;   /* panel chhota */
-  box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+html,body,#cesiumContainer{
+width:100%;
+height:100%;
+margin:0;
+padding:0;
+overflow:hidden;
+font-family:Arial;
 }
 
-.control-panel label {
-  display: block;
-  font-size: 10px;
-  color: #222;
-  margin-bottom: 4px;
-  font-weight: 600;
+.topbar{
+position:absolute;
+top:15px;
+left:50%;
+transform:translateX(-50%);
+z-index:10;
+background:rgba(20,20,20,0.85);
+color:white;
+padding:10px 20px;
+border-radius:10px;
+text-align:center;
+min-width:250px;
 }
 
-.control-panel button {
-  width: auto;       /* full width nahi */
-  padding: 4px 6px;
-  margin-bottom: 4px;
-  border: none;
-  border-radius: 4px;
-  background: #1f3a5f;
-  color: white;
-  cursor: pointer;
-  font-size: 10px;
-  line-height: 1.1;
+.topbar h1{
+margin:0;
+font-size:22px;
 }
 
-.control-panel button:hover {
-  background: #2e5c8a;
+.topbar p{
+margin:3px 0 0 0;
+font-size:11px;
 }
 
-    #plotInfoBox {
-      position: absolute;
-      left: 15px;
-      bottom: 15px;
-      z-index: 10;
-      width: 220px;
-      background: rgba(255,255,255,0.96);
-      border-radius: 8px;
-      box-shadow: 0 3px 12px rgba(0,0,0,0.18);
-      overflow: hidden;
-      font-family: Arial, sans-serif;
-    }
+/* globe control */
 
-    .plot-title {
-      background: #1f3a5f;
-      color: white;
-      padding: 8px 10px;
-      font-size: 12px;
-      font-weight: 600;
-    }
+.map-control{
+position:absolute;
+top:15px;
+left:15px;
+z-index:20;
+}
 
-    #plotInfoContent {
-      padding: 8px 10px;
-      font-size: 12px;
-      color: #222;
-      line-height: 1.5;
-    }
+.map-btn{
+width:40px;
+height:40px;
+border:none;
+border-radius:50%;
+background:#1f3a5f;
+color:white;
+font-size:20px;
+cursor:pointer;
+box-shadow:0 3px 8px rgba(0,0,0,0.3);
+}
 
-    .plot-row {
-      margin-bottom: 6px;
-      word-break: break-word;
-    }
+.map-menu{
+display:none;
+margin-top:8px;
+background:white;
+padding:6px;
+border-radius:6px;
+box-shadow:0 4px 12px rgba(0,0,0,0.2);
+}
 
-    .plot-label {
-      font-weight: 600;
-      color: #111;
-    }
+.map-menu button{
+display:block;
+width:80px;
+padding:6px;
+margin-bottom:4px;
+border:none;
+border-radius:4px;
+background:#1f3a5f;
+color:white;
+font-size:11px;
+cursor:pointer;
+}
 
-    #company {
-      position: absolute;
-      bottom: 15px;
-      right: 20px;
-      background: rgba(255,255,255,0.78);
-      color: #333;
-      padding: 6px 12px;
-      border-radius: 4px;
-      font-size: 13px;
-      font-weight: 400;
-      z-index: 10;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.10);
-    }
-    
-    .cesium-viewer-toolbar,
-    .cesium-viewer-animationContainer,
-    .cesium-viewer-timelineContainer,
-    .cesium-viewer-bottom {
-      display: none !important;
-    }
-  </style>
+.map-menu button:hover{
+background:#2e5c8a;
+}
+
+#plotInfoBox{
+position:absolute;
+left:15px;
+bottom:15px;
+z-index:10;
+width:220px;
+background:white;
+border-radius:8px;
+box-shadow:0 3px 12px rgba(0,0,0,0.2);
+overflow:hidden;
+}
+
+.plot-title{
+background:#1f3a5f;
+color:white;
+padding:8px;
+font-size:12px;
+}
+
+#plotInfoContent{
+padding:8px;
+font-size:12px;
+}
+
+#company{
+position:absolute;
+bottom:15px;
+right:20px;
+background:white;
+padding:6px 12px;
+border-radius:4px;
+font-size:12px;
+box-shadow:0 2px 10px rgba(0,0,0,0.1);
+}
+
+.cesium-viewer-toolbar,
+.cesium-viewer-animationContainer,
+.cesium-viewer-timelineContainer,
+.cesium-viewer-bottom{
+display:none !important;
+}
+
+</style>
 </head>
+
 <body>
 
-  <div class="topbar">
-    <h1>TECH SOCIETY</h1>
-    <p>3D Visualization Dashboard</p>
-  </div>
+<div class="topbar">
+<h1>TECH SOCIETY</h1>
+<p>3D Visualization Dashboard</p>
+</div>
 
-  <div class="control-panel">
-    <label>Basemap</label>
-    <button onclick="setOSM()">OSM</button>
-    <button onclick="setGoogle()">Imagery</button>
-    <button onclick="zoomToData()">Zoom</button>
-  </div>
+<!-- Globe Control -->
+<div class="map-control">
 
-  <div id="plotInfoBox">
-    <div class="plot-title">Plot Detail</div>
-    <div id="plotInfoContent">Click on a parcel to view its details</div>
-  </div>
+<button class="map-btn" onclick="toggleMenu()">🌍</button>
 
-  <div id="company">Prepared by MAPNEXUS</div>
+<div class="map-menu" id="mapMenu">
 
-  <div id="cesiumContainer"></div>
+<button onclick="setOSM()">OSM</button>
 
-  <script>
-    // =========================
-    // Cesium Token
-    // =========================
-    Cesium.Ion.defaultAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIxY2VlZDk5YS0zMzEwLTQ4YWYtYTE3Mi1lZDY5OTcyZmRiODkiLCJpZCI6Mzk5ODUxLCJpYXQiOjE3NzMxNjQ4MjB9.sXEWUY3TxpqkCvTAZW8qV0eNywFoqdFkpMtHP4azi9Q";
+<button onclick="setGoogle()">Imagery</button>
 
-    // =========================
-    // Asset ID and Fields
-    // =========================
-    const assetId = 4519585;
-    const heightFieldName = "Height";
+<button onclick="zoomToData()">Zoom</button>
 
-    // =========================
-    // Viewer
-    // =========================
-    const viewer = new Cesium.Viewer("cesiumContainer", {
-      animation: false,
-      timeline: false,
-      baseLayerPicker: false,
-      geocoder: false,
-      homeButton: false,
-      sceneModePicker: false,
-      navigationHelpButton: false,
-      infoBox: false,
-      selectionIndicator: false
-    });
+</div>
 
-    viewer.scene.globe.depthTestAgainstTerrain = true;
-    viewer.scene.screenSpaceCameraController.minimumZoomDistance = 10;
+</div>
 
-    // =========================
-    // Basemaps
-    // =========================
-    const osmProvider = new Cesium.OpenStreetMapImageryProvider({
-      url: "https://tile.openstreetmap.org/"
-    });
+<div id="plotInfoBox">
+<div class="plot-title">Plot Detail</div>
+<div id="plotInfoContent">Click on a parcel</div>
+</div>
 
-    const googleProvider = new Cesium.UrlTemplateImageryProvider({
-      url: "https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}"
-    });
+<div id="company">Prepared by MAPNEXUS</div>
 
-    viewer.imageryLayers.removeAll();
-    viewer.imageryLayers.addImageryProvider(osmProvider);
+<div id="cesiumContainer"></div>
 
-    function setOSM() {
-      viewer.imageryLayers.removeAll();
-      viewer.imageryLayers.addImageryProvider(osmProvider);
-    }
+<script>
 
-    function setGoogle() {
-      viewer.imageryLayers.removeAll();
-      viewer.imageryLayers.addImageryProvider(googleProvider);
-    }
+Cesium.Ion.defaultAccessToken="YOUR_TOKEN";
 
-    // =========================
-    // Info Box
-    // =========================
-    const plotInfoContent = document.getElementById("plotInfoContent");
+const assetId=4519585;
+const heightFieldName="Height";
 
-    function clearPlotInfo() {
-      plotInfoContent.innerHTML = "Kisi parcel par click karein";
-    }
+const viewer=new Cesium.Viewer("cesiumContainer",{
+animation:false,
+timeline:false,
+baseLayerPicker:false,
+geocoder:false,
+homeButton:false,
+sceneModePicker:false,
+navigationHelpButton:false,
+infoBox:false,
+selectionIndicator:false
+});
 
-    function getPropMulti(entity, fieldNames, time) {
-      if (!entity || !entity.properties) return "N/A";
+viewer.scene.globe.depthTestAgainstTerrain=true;
 
-      for (const fieldName of fieldNames) {
-        if (entity.properties[fieldName]) {
-          const val = entity.properties[fieldName].getValue(time);
-          if (val !== null && val !== undefined && val !== "") {
-            return val;
-          }
-        }
-      }
-      return "N/A";
-    }
+/* basemaps */
 
-    function updatePlotInfo(entity) {
-      const currentTime = viewer.clock.currentTime;
+const osmProvider=new Cesium.OpenStreetMapImageryProvider({
+url:"https://tile.openstreetmap.org/"
+});
 
-      const ownerName = getPropMulti(
-        entity,
-        ["Owner_Name", "OWNER_NAME", "OwnerName", "Owner", "owner_name"],
-        currentTime
-      );
+const googleProvider=new Cesium.UrlTemplateImageryProvider({
+url:"https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}"
+});
 
-      const plotNo = getPropMulti(
-        entity,
-        ["Plot_No", "PLOT_NO", "PlotNo", "Plot", "plot_no"],
-        currentTime
-      );
+viewer.imageryLayers.removeAll();
+viewer.imageryLayers.addImageryProvider(osmProvider);
 
-      const heightVal = getPropMulti(
-        entity,
-        [heightFieldName, "HEIGHT", "height", "Height"],
-        currentTime
-      );
+function setOSM(){
+viewer.imageryLayers.removeAll();
+viewer.imageryLayers.addImageryProvider(osmProvider);
+}
 
-      plotInfoContent.innerHTML = `
-        <div class="plot-row"><span class="plot-label">Owner:</span> ${ownerName}</div>
-        <div class="plot-row"><span class="plot-label">Plot No:</span> ${plotNo}</div>
-        <div class="plot-row"><span class="plot-label">Height:</span> ${heightVal} ft</div>
-      `;
-    }
+function setGoogle(){
+viewer.imageryLayers.removeAll();
+viewer.imageryLayers.addImageryProvider(googleProvider);
+}
 
-    // =========================
-    // Styling
-    // =========================
-    function setNormalStyle(entity) {
-      if (!entity || !entity.polygon) return;
+/* dropdown */
 
-      entity.polygon.material = Cesium.Color.fromCssColorString("#19a7ff");
-      entity.polygon.outline = true;
-      entity.polygon.outlineColor = Cesium.Color.WHITE;
-    }
+function toggleMenu(){
 
-    function setHighlightStyle(entity) {
-      if (!entity || !entity.polygon) return;
+const menu=document.getElementById("mapMenu");
 
-      entity.polygon.material = Cesium.Color.YELLOW;
-      entity.polygon.outline = true;
-      entity.polygon.outlineColor = Cesium.Color.RED;
-    }
+if(menu.style.display==="block"){
+menu.style.display="none";
+}else{
+menu.style.display="block";
+}
 
-    // =========================
-    // Data Load
-    // =========================
-    let loadedDataSource = null;
-    let selectedEntity = null;
+}
 
-    function zoomToData() {
-      if (loadedDataSource) {
-        viewer.flyTo(loadedDataSource);
-      }
-    }
+/* plot info */
 
-    async function loadGeoJson3D() {
-      try {
-        const geoJsonResource = await Cesium.IonResource.fromAssetId(assetId);
+const plotInfoContent=document.getElementById("plotInfoContent");
 
-        const dataSource = await Cesium.GeoJsonDataSource.load(geoJsonResource, {
-          clampToGround: false
-        });
+function getProp(entity,name,time){
+if(entity.properties && entity.properties[name]){
+return entity.properties[name].getValue(time);
+}
+return "N/A";
+}
 
-        loadedDataSource = await viewer.dataSources.add(dataSource);
+function updatePlotInfo(entity){
 
-        const entities = loadedDataSource.entities.values;
+const time=viewer.clock.currentTime;
 
-        for (const entity of entities) {
-          if (Cesium.defined(entity.polygon)) {
-            entity.polygon.height = 0;
-            setNormalStyle(entity);
+plotInfoContent.innerHTML=`
+Owner: ${getProp(entity,"Owner_Name",time)}<br>
+Plot: ${getProp(entity,"Plot_No",time)}<br>
+Height: ${getProp(entity,heightFieldName,time)} ft
+`;
 
-            if (entity.properties && entity.properties[heightFieldName]) {
-              const heightProp = entity.properties[heightFieldName];
+}
 
-              entity.polygon.extrudedHeight = new Cesium.CallbackProperty(function(time) {
-                const h = Number(heightProp.getValue(time)) || 0;
-                return h * 0.3048; // feet to meter
-              }, false);
-            } else {
-              entity.polygon.extrudedHeight = 0;
-            }
-          }
-        }
+/* style */
 
-        await viewer.flyTo(loadedDataSource);
-      } catch (error) {
-        console.error("Detailed load error:", error);
-        alert("Data load mein issue aa gaya. F12 console check karo.");
-      }
-    }
+function setNormal(entity){
+entity.polygon.material=Cesium.Color.fromCssColorString("#19a7ff");
+entity.polygon.outline=true;
+entity.polygon.outlineColor=Cesium.Color.WHITE;
+}
 
-    // =========================
-    // Click / Highlight
-    // =========================
-    const handler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
+function setHighlight(entity){
+entity.polygon.material=Cesium.Color.YELLOW;
+entity.polygon.outline=true;
+entity.polygon.outlineColor=Cesium.Color.RED;
+}
 
-    handler.setInputAction(function(click) {
-      const pickedObject = viewer.scene.pick(click.position);
+/* load data */
 
-      if (!Cesium.defined(pickedObject) || !pickedObject.id) {
-        if (selectedEntity) {
-          setNormalStyle(selectedEntity);
-          selectedEntity = null;
-        }
-        clearPlotInfo();
-        return;
-      }
+let loadedDataSource=null;
+let selectedEntity=null;
 
-      const entity = pickedObject.id;
+function zoomToData(){
+if(loadedDataSource){
+viewer.flyTo(loadedDataSource);
+}
+}
 
-      if (!entity.polygon) return;
+async function loadGeoJson(){
 
-      if (selectedEntity && selectedEntity !== entity) {
-        setNormalStyle(selectedEntity);
-      }
+const resource=await Cesium.IonResource.fromAssetId(assetId);
 
-      selectedEntity = entity;
-      setHighlightStyle(entity);
-      updatePlotInfo(entity);
+const dataSource=await Cesium.GeoJsonDataSource.load(resource,{
+clampToGround:false
+});
 
-    }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
+loadedDataSource=await viewer.dataSources.add(dataSource);
 
-    loadGeoJson3D();
-  </script>
+const entities=loadedDataSource.entities.values;
+
+for(const entity of entities){
+
+if(entity.polygon){
+
+entity.polygon.height=0;
+setNormal(entity);
+
+if(entity.properties && entity.properties[heightFieldName]){
+
+const heightProp=entity.properties[heightFieldName];
+
+entity.polygon.extrudedHeight=new Cesium.CallbackProperty(function(time){
+
+const h=Number(heightProp.getValue(time))||0;
+return h*0.3048;
+
+},false);
+
+}
+
+}
+
+}
+
+viewer.flyTo(loadedDataSource);
+
+}
+
+/* click highlight */
+
+const handler=new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
+
+handler.setInputAction(function(click){
+
+const picked=viewer.scene.pick(click.position);
+
+if(!Cesium.defined(picked) || !picked.id){
+
+if(selectedEntity){
+setNormal(selectedEntity);
+selectedEntity=null;
+}
+
+return;
+
+}
+
+const entity=picked.id;
+
+if(!entity.polygon) return;
+
+if(selectedEntity && selectedEntity!==entity){
+setNormal(selectedEntity);
+}
+
+selectedEntity=entity;
+
+setHighlight(entity);
+
+updatePlotInfo(entity);
+
+},Cesium.ScreenSpaceEventType.LEFT_CLICK);
+
+loadGeoJson();
+
+</script>
+
 </body>
 </html>
