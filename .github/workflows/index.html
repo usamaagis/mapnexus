@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>TECH SOCIETY - MAPNEXUS 3D Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <script src="https://cesium.com/downloads/cesiumjs/releases/1.139.1/Build/Cesium/Cesium.js"></script>
+  <link href="https://cesium.com/downloads/cesiumjs/releases/1.139.1/Build/Cesium/Widgets/widgets.css" rel="stylesheet" />
+
+  <style>
+    html, body, #cesiumContainer {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      font-family: Arial, sans-serif;
+    }
+
+    .topbar {
+      position: absolute;
+      top: 15px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+      background: rgba(20, 20, 20, 0.82);
+      color: #fff;
+      padding: 12px 24px;
+      border-radius: 10px;
+      text-align: center;
+      min-width: 280px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.25);
+    }
+
+    .topbar h1 {
+      margin: 0;
+      font-size: 24px;
+      font-weight: 600;
+      letter-spacing: 1px;
+    }
+
+    .topbar p {
+      margin: 4px 0 0 0;
+      font-size: 12px;
+      font-weight: 400;
+      opacity: 0.9;
+    }
+
+    .control-panel {
+      position: absolute;
+      top: 15px;
+      left: 15px;
+      z-index: 10;
+      background: rgba(255,255,255,0.94);
+      padding: 8px;
+      border-radius: 8px;
+      min-width: 110px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.16);
+    }
+
+    .control-panel label {
+      display: block;
+      font-size: 11px;
+      color: #222;
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+
+    .control-panel button {
+      width: 100%;
+      padding: 7px 8px;
+      margin-bottom: 6px;
+      border: none;
+      border-radius: 5px;
+      background: #1f3a5f;
+      color: white;
+      cursor: pointer;
+      font-size: 11px;
+      line-height: 1.2;
+    }
+
+    .control-panel button:hover {
+      background: #2e5c8a;
+    }
+
+    #plotInfoBox {
+      position: absolute;
+      left: 15px;
+      bottom: 15px;
+      z-index: 10;
+      width: 220px;
+      background: rgba(255,255,255,0.96);
+      border-radius: 8px;
+      box-shadow: 0 3px 12px rgba(0,0,0,0.18);
+      overflow: hidden;
+      font-family: Arial, sans-serif;
+    }
+
+    .plot-title {
+      background: #1f3a5f;
+      color: white;
+      padding: 8px 10px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    #plotInfoContent {
+      padding: 8px 10px;
+      font-size: 12px;
+      color: #222;
+      line-height: 1.5;
+    }
+
+    .plot-row {
+      margin-bottom: 6px;
+      word-break: break-word;
+    }
+
+    .plot-label {
+      font-weight: 600;
+      color: #111;
+    }
+
+    #company {
+      position: absolute;
+      bottom: 15px;
+      right: 20px;
+      background: rgba(255,255,255,0.78);
+      color: #333;
+      padding: 6px 12px;
+      border-radius: 4px;
+      font-size: 13px;
+      font-weight: 400;
+      z-index: 10;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.10);
+    }
+
+    .cesium-viewer-toolbar,
+    .cesium-viewer-animationContainer,
+    .cesium-viewer-timelineContainer,
+    .cesium-viewer-bottom {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="topbar">
+    <h1>TECH SOCIETY</h1>
+    <p>3D Visualization Dashboard</p>
+  </div>
+
+  <div class="control-panel">
+    <label>Basemap</label>
+    <button onclick="setOSM()">OSM</button>
+    <button onclick="setGoogle()">Google</button>
+    <button onclick="zoomToData()">Zoom</button>
+  </div>
+
+  <div id="plotInfoBox">
+    <div class="plot-title">Plot Detail</div>
+    <div id="plotInfoContent">Click on a parcel to view its details</div>
+  </div>
+
+  <div id="company">Prepared by MAPNEXUS</div>
+
+  <div id="cesiumContainer"></div>
+
+  <script>
+    // =========================
+    // Cesium Token
+    // =========================
+    Cesium.Ion.defaultAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIxY2VlZDk5YS0zMzEwLTQ4YWYtYTE3Mi1lZDY5OTcyZmRiODkiLCJpZCI6Mzk5ODUxLCJpYXQiOjE3NzMxNjQ4MjB9.sXEWUY3TxpqkCvTAZW8qV0eNywFoqdFkpMtHP4azi9Q";
+
+    // =========================
+    // Asset ID and Fields
+    // =========================
+    const assetId = 4519585;
+    const heightFieldName = "Height";
+
+    // =========================
+    // Viewer
+    // =========================
+    const viewer = new Cesium.Viewer("cesiumContainer", {
+      animation: false,
+      timeline: false,
+      baseLayerPicker: false,
+      geocoder: false,
+      homeButton: false,
+      sceneModePicker: false,
+      navigationHelpButton: false,
+      infoBox: false,
+      selectionIndicator: false
+    });
+
+    viewer.scene.globe.depthTestAgainstTerrain = true;
+    viewer.scene.screenSpaceCameraController.minimumZoomDistance = 10;
+
+    // =========================
+    // Basemaps
+    // =========================
+    const osmProvider = new Cesium.OpenStreetMapImageryProvider({
+      url: "https://tile.openstreetmap.org/"
+    });
+
+    const googleProvider = new Cesium.UrlTemplateImageryProvider({
+      url: "https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}"
+    });
+
+    viewer.imageryLayers.removeAll();
+    viewer.imageryLayers.addImageryProvider(osmProvider);
+
+    function setOSM() {
+      viewer.imageryLayers.removeAll();
+      viewer.imageryLayers.addImageryProvider(osmProvider);
+    }
+
+    function setGoogle() {
+      viewer.imageryLayers.removeAll();
+      viewer.imageryLayers.addImageryProvider(googleProvider);
+    }
+
+    // =========================
+    // Info Box
+    // =========================
+    const plotInfoContent = document.getElementById("plotInfoContent");
+
+    function clearPlotInfo() {
+      plotInfoContent.innerHTML = "Kisi parcel par click karein";
+    }
+
+    function getPropMulti(entity, fieldNames, time) {
+      if (!entity || !entity.properties) return "N/A";
+
+      for (const fieldName of fieldNames) {
+        if (entity.properties[fieldName]) {
+          const val = entity.properties[fieldName].getValue(time);
+          if (val !== null && val !== undefined && val !== "") {
+            return val;
+          }
+        }
+      }
+      return "N/A";
+    }
+
+    function updatePlotInfo(entity) {
+      const currentTime = viewer.clock.currentTime;
+
+      const ownerName = getPropMulti(
+        entity,
+        ["Owner_Name", "OWNER_NAME", "OwnerName", "Owner", "owner_name"],
+        currentTime
+      );
+
+      const plotNo = getPropMulti(
+        entity,
+        ["Plot_No", "PLOT_NO", "PlotNo", "Plot", "plot_no"],
+        currentTime
+      );
+
+      const heightVal = getPropMulti(
+        entity,
+        [heightFieldName, "HEIGHT", "height", "Height"],
+        currentTime
+      );
+
+      plotInfoContent.innerHTML = `
+        <div class="plot-row"><span class="plot-label">Owner:</span> ${ownerName}</div>
+        <div class="plot-row"><span class="plot-label">Plot No:</span> ${plotNo}</div>
+        <div class="plot-row"><span class="plot-label">Height:</span> ${heightVal} ft</div>
+      `;
+    }
+
+    // =========================
+    // Styling
+    // =========================
+    function setNormalStyle(entity) {
+      if (!entity || !entity.polygon) return;
+
+      entity.polygon.material = Cesium.Color.fromCssColorString("#19a7ff");
+      entity.polygon.outline = true;
+      entity.polygon.outlineColor = Cesium.Color.WHITE;
+    }
+
+    function setHighlightStyle(entity) {
+      if (!entity || !entity.polygon) return;
+
+      entity.polygon.material = Cesium.Color.YELLOW;
+      entity.polygon.outline = true;
+      entity.polygon.outlineColor = Cesium.Color.RED;
+    }
+
+    // =========================
+    // Data Load
+    // =========================
+    let loadedDataSource = null;
+    let selectedEntity = null;
+
+    function zoomToData() {
+      if (loadedDataSource) {
+        viewer.flyTo(loadedDataSource);
+      }
+    }
+
+    async function loadGeoJson3D() {
+      try {
+        const geoJsonResource = await Cesium.IonResource.fromAssetId(assetId);
+
+        const dataSource = await Cesium.GeoJsonDataSource.load(geoJsonResource, {
+          clampToGround: false
+        });
+
+        loadedDataSource = await viewer.dataSources.add(dataSource);
+
+        const entities = loadedDataSource.entities.values;
+
+        for (const entity of entities) {
+          if (Cesium.defined(entity.polygon)) {
+            entity.polygon.height = 0;
+            setNormalStyle(entity);
+
+            if (entity.properties && entity.properties[heightFieldName]) {
+              const heightProp = entity.properties[heightFieldName];
+
+              entity.polygon.extrudedHeight = new Cesium.CallbackProperty(function(time) {
+                const h = Number(heightProp.getValue(time)) || 0;
+                return h * 0.3048; // feet to meter
+              }, false);
+            } else {
+              entity.polygon.extrudedHeight = 0;
+            }
+          }
+        }
+
+        await viewer.flyTo(loadedDataSource);
+      } catch (error) {
+        console.error("Detailed load error:", error);
+        alert("Data load mein issue aa gaya. F12 console check karo.");
+      }
+    }
+
+    // =========================
+    // Click / Highlight
+    // =========================
+    const handler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
+
+    handler.setInputAction(function(click) {
+      const pickedObject = viewer.scene.pick(click.position);
+
+      if (!Cesium.defined(pickedObject) || !pickedObject.id) {
+        if (selectedEntity) {
+          setNormalStyle(selectedEntity);
+          selectedEntity = null;
+        }
+        clearPlotInfo();
+        return;
+      }
+
+      const entity = pickedObject.id;
+
+      if (!entity.polygon) return;
+
+      if (selectedEntity && selectedEntity !== entity) {
+        setNormalStyle(selectedEntity);
+      }
+
+      selectedEntity = entity;
+      setHighlightStyle(entity);
+      updatePlotInfo(entity);
+
+    }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
+
+    loadGeoJson3D();
+  </script>
+</body>
+</html>
