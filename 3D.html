@@ -162,9 +162,33 @@
       color: #111;
     }
 
-    /* hidden permanently */
     #measureInfoBox {
-      display: none !important;
+      position: absolute;
+      right: 15px;
+      bottom: 55px;
+      z-index: 10;
+      width: 230px;
+      background: rgba(255,255,255,0.96);
+      border-radius: 8px;
+      box-shadow: 0 3px 12px rgba(0,0,0,0.18);
+      overflow: hidden;
+      display: none;
+    }
+
+    .measure-title {
+      background: #1f3a5f;
+      color: white;
+      padding: 8px 10px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    #measureInfoContent {
+      padding: 8px 10px;
+      font-size: 12px;
+      color: #222;
+      line-height: 1.5;
+      min-height: 18px;
     }
 
     #company {
@@ -295,6 +319,22 @@
         padding: 6px 8px;
       }
 
+      #measureInfoBox {
+        right: 10px;
+        bottom: 45px;
+        width: 180px;
+      }
+
+      .measure-title {
+        font-size: 10px;
+        padding: 6px 8px;
+      }
+
+      #measureInfoContent {
+        font-size: 10px;
+        padding: 6px 8px;
+      }
+
       #company {
         right: 10px;
         bottom: 10px;
@@ -365,7 +405,7 @@
 
   <div id="measureInfoBox">
     <div class="measure-title">Measurement</div>
-    <div id="measureInfoContent">Measurement off</div>
+    <div id="measureInfoContent"></div>
   </div>
 
   <div id="company">Prepared by MAPNEXUS</div>
@@ -405,6 +445,8 @@
     viewer.imageryLayers.addImageryProvider(osmProvider);
 
     const plotInfoContent = document.getElementById("plotInfoContent");
+    const measureInfoBox = document.getElementById("measureInfoBox");
+    const measureInfoContent = document.getElementById("measureInfoContent");
     const measureBtn = document.getElementById("measureBtn");
     const northArrow = document.getElementById("northArrow");
     const modeLabel = document.getElementById("modeLabel");
@@ -611,7 +653,6 @@
 
     let measureMode = false;
     let measurePositions = [];
-    let floatingPoint = null;
     let activeShape = null;
     let measureLabels = [];
     let measurePoints = [];
@@ -620,15 +661,12 @@
       clearMeasurementEntitiesOnly();
       measureMode = true;
       measureBtn.classList.add("active-btn");
+      measureInfoBox.style.display = "block";
+      measureInfoContent.innerHTML = "";
       closeMeasureMenu();
     }
 
     function clearMeasurementEntitiesOnly() {
-      if (floatingPoint) {
-        viewer.entities.remove(floatingPoint);
-        floatingPoint = null;
-      }
-
       if (activeShape) {
         viewer.entities.remove(activeShape);
         activeShape = null;
@@ -652,6 +690,8 @@
       measureBtn.classList.remove("active-btn");
       closeMeasureMenu();
       clearMeasurementEntitiesOnly();
+      measureInfoContent.innerHTML = "";
+      measureInfoBox.style.display = "none";
     }
 
     function createPoint(worldPosition) {
@@ -793,6 +833,7 @@
         if (measurePositions.length === 0) {
           measurePositions.push(clickedPosition);
           createPoint(clickedPosition);
+          measureInfoContent.innerHTML = "0.00 m / 0.00 ft";
 
           const dynamicPositions = new Cesium.CallbackProperty(function() {
             return measurePositions;
@@ -810,8 +851,9 @@
 
           const finalDistance = calculateDistance(measurePositions);
           addDistanceLabel(clickedPosition, formatDistance(finalDistance));
-
           measurePositions.push(clickedPosition.clone());
+
+          measureInfoContent.innerHTML = `<b>${formatDistance(finalDistance)}</b>`;
         }
         return;
       }
@@ -852,6 +894,9 @@
       } else {
         measurePositions[measurePositions.length - 1] = newPosition;
       }
+
+      const previewDistance = calculateDistance(measurePositions);
+      measureInfoContent.innerHTML = `<b>${formatDistance(previewDistance)}</b>`;
     }, Cesium.ScreenSpaceEventType.MOUSE_MOVE);
 
     handler.setInputAction(function() {
@@ -860,6 +905,9 @@
       if (measurePositions.length > 1) {
         measurePositions.pop();
       }
+
+      const finalDistance = calculateDistance(measurePositions);
+      measureInfoContent.innerHTML = measurePositions.length ? `<b>${formatDistance(finalDistance)}</b>` : "";
     }, Cesium.ScreenSpaceEventType.RIGHT_CLICK);
 
     updateNorthArrow();
