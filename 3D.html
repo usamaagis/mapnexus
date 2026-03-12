@@ -47,16 +47,27 @@
       opacity: 0.9;
     }
 
-    .map-control {
+    .left-control {
       position: absolute;
       top: 15px;
       left: 15px;
-      z-index: 20;
+      z-index: 30;
+    }
+
+    .right-control {
+      position: absolute;
+      top: 120px;
+      right: 15px;
+      z-index: 30;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      align-items: center;
     }
 
     .map-btn {
-      width: 40px;
-      height: 40px;
+      width: 42px;
+      height: 42px;
       border: none;
       border-radius: 50%;
       background: #1f3a5f;
@@ -64,10 +75,17 @@
       font-size: 18px;
       cursor: pointer;
       box-shadow: 0 3px 10px rgba(0,0,0,0.22);
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .map-btn:hover {
       background: #2e5c8a;
+    }
+
+    .map-btn.active-btn {
+      background: #c0392b;
     }
 
     .map-menu {
@@ -77,13 +95,13 @@
       padding: 6px;
       border-radius: 8px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.18);
-      min-width: 88px;
+      min-width: 120px;
     }
 
     .map-menu button {
       display: block;
       width: 100%;
-      padding: 6px 8px;
+      padding: 7px 8px;
       margin-bottom: 5px;
       border: none;
       border-radius: 4px;
@@ -144,6 +162,34 @@
       color: #111;
     }
 
+    #measureInfoBox {
+      position: absolute;
+      right: 15px;
+      bottom: 55px;
+      z-index: 10;
+      width: 230px;
+      background: rgba(255,255,255,0.96);
+      border-radius: 8px;
+      box-shadow: 0 3px 12px rgba(0,0,0,0.18);
+      overflow: hidden;
+      display: none;
+    }
+
+    .measure-title {
+      background: #1f3a5f;
+      color: white;
+      padding: 8px 10px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    #measureInfoContent {
+      padding: 8px 10px;
+      font-size: 12px;
+      color: #222;
+      line-height: 1.5;
+    }
+
     #company {
       position: absolute;
       bottom: 15px;
@@ -156,6 +202,57 @@
       font-weight: 400;
       z-index: 10;
       box-shadow: 0 2px 10px rgba(0,0,0,0.10);
+    }
+
+    #northArrowBox {
+      width: 54px;
+      height: 78px;
+      background: rgba(255,255,255,0.96);
+      border-radius: 10px;
+      box-shadow: 0 3px 12px rgba(0,0,0,0.18);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 6px 4px;
+      user-select: none;
+    }
+
+    #northText {
+      font-size: 14px;
+      font-weight: 700;
+      color: #111;
+      margin-bottom: 2px;
+      line-height: 1;
+    }
+
+    #northArrow {
+      font-size: 28px;
+      color: #c0392b;
+      line-height: 1;
+      transition: transform 0.15s linear;
+      transform-origin: center center;
+    }
+
+    .tool-divider {
+      width: 32px;
+      height: 1px;
+      background: rgba(255,255,255,0.4);
+      margin: 2px 0;
+    }
+
+    .mode-label {
+      position: absolute;
+      top: 15px;
+      right: 75px;
+      z-index: 30;
+      background: rgba(255,255,255,0.95);
+      color: #111;
+      padding: 7px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.18);
     }
 
     .cesium-viewer-toolbar,
@@ -184,19 +281,25 @@
         margin-top: 2px;
       }
 
-      .map-control {
+      .left-control {
         top: 10px;
         left: 10px;
       }
 
+      .right-control {
+        top: 105px;
+        right: 10px;
+        gap: 6px;
+      }
+
       .map-btn {
-        width: 34px;
-        height: 34px;
-        font-size: 16px;
+        width: 36px;
+        height: 36px;
+        font-size: 15px;
       }
 
       .map-menu {
-        min-width: 78px;
+        min-width: 95px;
         padding: 5px;
       }
 
@@ -222,11 +325,47 @@
         padding: 6px 8px;
       }
 
+      #measureInfoBox {
+        right: 10px;
+        bottom: 45px;
+        width: 180px;
+      }
+
+      .measure-title {
+        font-size: 10px;
+        padding: 6px 8px;
+      }
+
+      #measureInfoContent {
+        font-size: 10px;
+        padding: 6px 8px;
+      }
+
       #company {
         right: 10px;
         bottom: 10px;
         font-size: 10px;
         padding: 4px 8px;
+      }
+
+      #northArrowBox {
+        width: 46px;
+        height: 68px;
+      }
+
+      #northText {
+        font-size: 12px;
+      }
+
+      #northArrow {
+        font-size: 24px;
+      }
+
+      .mode-label {
+        top: 10px;
+        right: 58px;
+        font-size: 10px;
+        padding: 5px 8px;
       }
     }
   </style>
@@ -238,13 +377,31 @@
     <p>3D Visualization Dashboard</p>
   </div>
 
-  <div class="map-control">
-    <button class="map-btn" onclick="toggleMenu()">🌍</button>
+  <div class="mode-label" id="modeLabel">3D Mode</div>
+
+  <div class="left-control">
+    <button class="map-btn" onclick="toggleMapMenu()">🌍</button>
     <div class="map-menu" id="mapMenu">
       <button onclick="setOSM()">OSM</button>
       <button onclick="setGoogle()">Imagery</button>
       <button onclick="zoomToData()">Zoom</button>
     </div>
+
+    <button class="map-btn" id="measureBtn" onclick="toggleMeasureMenu()" style="margin-top:8px;">📏</button>
+    <div class="map-menu" id="measureMenu">
+      <button onclick="startMeasurement()">Start Measure</button>
+      <button onclick="clearMeasurement()">Clear Measure</button>
+    </div>
+  </div>
+
+  <div class="right-control">
+    <div id="northArrowBox">
+      <div id="northText">N</div>
+      <div id="northArrow">▲</div>
+    </div>
+
+    <button class="map-btn" id="locationBtn" onclick="goToCurrentLocation()" title="Current Location">📍</button>
+    <button class="map-btn" id="modeToggleBtn" onclick="toggle2D3D()" title="2D / 3D">🧭</button>
   </div>
 
   <div id="plotInfoBox">
@@ -252,8 +409,12 @@
     <div id="plotInfoContent">Click on a parcel to view its details</div>
   </div>
 
-  <div id="company">Prepared by MAPNEXUS</div>
+  <div id="measureInfoBox">
+    <div class="measure-title">Measurement</div>
+    <div id="measureInfoContent">Measurement off</div>
+  </div>
 
+  <div id="company">Prepared by MAPNEXUS</div>
   <div id="cesiumContainer"></div>
 
   <script>
@@ -271,7 +432,8 @@
       sceneModePicker: false,
       navigationHelpButton: false,
       infoBox: false,
-      selectionIndicator: false
+      selectionIndicator: false,
+      sceneMode: Cesium.SceneMode.SCENE3D
     });
 
     viewer.scene.globe.depthTestAgainstTerrain = true;
@@ -288,35 +450,56 @@
     viewer.imageryLayers.removeAll();
     viewer.imageryLayers.addImageryProvider(osmProvider);
 
+    const plotInfoContent = document.getElementById("plotInfoContent");
+    const measureInfoBox = document.getElementById("measureInfoBox");
+    const measureInfoContent = document.getElementById("measureInfoContent");
+    const measureBtn = document.getElementById("measureBtn");
+    const northArrow = document.getElementById("northArrow");
+    const modeLabel = document.getElementById("modeLabel");
+    const modeToggleBtn = document.getElementById("modeToggleBtn");
+    const locationBtn = document.getElementById("locationBtn");
+
     function setOSM() {
       viewer.imageryLayers.removeAll();
       viewer.imageryLayers.addImageryProvider(osmProvider);
-      closeMenu();
+      closeMapMenu();
     }
 
     function setGoogle() {
       viewer.imageryLayers.removeAll();
       viewer.imageryLayers.addImageryProvider(googleProvider);
-      closeMenu();
+      closeMapMenu();
     }
 
-    function toggleMenu() {
+    function toggleMapMenu() {
       const menu = document.getElementById("mapMenu");
+      const measureMenu = document.getElementById("measureMenu");
+      measureMenu.style.display = "none";
       menu.style.display = menu.style.display === "block" ? "none" : "block";
     }
 
-    function closeMenu() {
+    function closeMapMenu() {
       document.getElementById("mapMenu").style.display = "none";
     }
 
-    document.addEventListener("click", function (event) {
-      const control = document.querySelector(".map-control");
-      if (!control.contains(event.target)) {
-        closeMenu();
+    function toggleMeasureMenu() {
+      const menu = document.getElementById("measureMenu");
+      const mapMenu = document.getElementById("mapMenu");
+      mapMenu.style.display = "none";
+      menu.style.display = menu.style.display === "block" ? "none" : "block";
+    }
+
+    function closeMeasureMenu() {
+      document.getElementById("measureMenu").style.display = "none";
+    }
+
+    document.addEventListener("click", function(event) {
+      const leftControl = document.querySelector(".left-control");
+      if (!leftControl.contains(event.target)) {
+        closeMapMenu();
+        closeMeasureMenu();
       }
     });
-
-    const plotInfoContent = document.getElementById("plotInfoContent");
 
     function clearPlotInfo() {
       plotInfoContent.innerHTML = "Click on a parcel to view its details";
@@ -387,7 +570,7 @@
       if (loadedDataSource) {
         viewer.flyTo(loadedDataSource);
       }
-      closeMenu();
+      closeMapMenu();
     }
 
     async function loadGeoJson3D() {
@@ -427,9 +610,260 @@
       }
     }
 
+    function getPositionFromScreen(position) {
+      const scene = viewer.scene;
+
+      if (scene.pickPositionSupported) {
+        const pickedPosition = scene.pickPosition(position);
+        if (Cesium.defined(pickedPosition)) {
+          return pickedPosition;
+        }
+      }
+
+      const ray = viewer.camera.getPickRay(position);
+      if (!ray) return null;
+
+      return scene.globe.pick(ray, scene);
+    }
+
+    function calculateDistance(positions) {
+      let totalDistance = 0;
+
+      for (let i = 0; i < positions.length - 1; i++) {
+        const c1 = Cesium.Cartographic.fromCartesian(positions[i]);
+        const c2 = Cesium.Cartographic.fromCartesian(positions[i + 1]);
+
+        const geodesic = new Cesium.EllipsoidGeodesic(c1, c2);
+        const surfaceDistance = geodesic.surfaceDistance;
+
+        const heightDiff = (c2.height || 0) - (c1.height || 0);
+        const segmentDistance = Math.sqrt(
+          Math.pow(surfaceDistance, 2) + Math.pow(heightDiff, 2)
+        );
+
+        totalDistance += segmentDistance;
+      }
+
+      return totalDistance;
+    }
+
+    function formatDistance(meters) {
+      const feet = meters * 3.28084;
+
+      if (meters < 1000) {
+        return `${meters.toFixed(2)} m / ${feet.toFixed(2)} ft`;
+      } else {
+        return `${(meters / 1000).toFixed(2)} km / ${feet.toFixed(2)} ft`;
+      }
+    }
+
+    let measureMode = false;
+    let measurePositions = [];
+    let floatingPoint = null;
+    let activeShape = null;
+    let measureLabels = [];
+
+    function startMeasurement() {
+      clearMeasurementEntitiesOnly();
+      measureMode = true;
+      measureBtn.classList.add("active-btn");
+      measureInfoBox.style.display = "block";
+      measureInfoContent.innerHTML = "Measurement ON<br>Map par points click karein";
+      closeMeasureMenu();
+    }
+
+    function clearMeasurementEntitiesOnly() {
+      if (floatingPoint) {
+        viewer.entities.remove(floatingPoint);
+        floatingPoint = null;
+      }
+
+      if (activeShape) {
+        viewer.entities.remove(activeShape);
+        activeShape = null;
+      }
+
+      for (const lbl of measureLabels) {
+        viewer.entities.remove(lbl);
+      }
+
+      measureLabels = [];
+      measurePositions = [];
+    }
+
+    function clearMeasurement() {
+      measureMode = false;
+      measureBtn.classList.remove("active-btn");
+      closeMeasureMenu();
+      clearMeasurementEntitiesOnly();
+      measureInfoContent.innerHTML = "Measurement off";
+      measureInfoBox.style.display = "none";
+    }
+
+    function createPoint(worldPosition) {
+      return viewer.entities.add({
+        position: worldPosition,
+        point: {
+          pixelSize: 10,
+          color: Cesium.Color.YELLOW,
+          outlineColor: Cesium.Color.BLACK,
+          outlineWidth: 2,
+          disableDepthTestDistance: Number.POSITIVE_INFINITY
+        }
+      });
+    }
+
+    function drawShape(positionData) {
+      return viewer.entities.add({
+        polyline: {
+          positions: positionData,
+          width: 3,
+          material: Cesium.Color.YELLOW,
+          clampToGround: false
+        }
+      });
+    }
+
+    function addDistanceLabel(position, text) {
+      const labelEntity = viewer.entities.add({
+        position: position,
+        label: {
+          text: text,
+          font: "14px Arial",
+          fillColor: Cesium.Color.WHITE,
+          style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+          outlineWidth: 3,
+          verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+          pixelOffset: new Cesium.Cartesian2(0, -12),
+          disableDepthTestDistance: Number.POSITIVE_INFINITY
+        }
+      });
+
+      measureLabels.push(labelEntity);
+    }
+
+    async function goToCurrentLocation() {
+      if (!navigator.geolocation) {
+        alert("Geolocation browser mein supported nahi hai.");
+        return;
+      }
+
+      locationBtn.classList.add("active-btn");
+
+      navigator.geolocation.getCurrentPosition(
+        function(position) {
+          const lon = position.coords.longitude;
+          const lat = position.coords.latitude;
+
+          viewer.entities.add({
+            position: Cesium.Cartesian3.fromDegrees(lon, lat, 0),
+            point: {
+              pixelSize: 14,
+              color: Cesium.Color.RED,
+              outlineColor: Cesium.Color.WHITE,
+              outlineWidth: 3,
+              disableDepthTestDistance: Number.POSITIVE_INFINITY
+            },
+            label: {
+              text: "Current Location",
+              font: "14px Arial",
+              fillColor: Cesium.Color.WHITE,
+              style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+              outlineWidth: 3,
+              verticalOrigin: Cesium.VerticalOrigin.TOP,
+              pixelOffset: new Cesium.Cartesian2(0, 16),
+              disableDepthTestDistance: Number.POSITIVE_INFINITY
+            }
+          });
+
+          viewer.camera.flyTo({
+            destination: Cesium.Cartesian3.fromDegrees(lon, lat, 1200),
+            orientation: {
+              heading: viewer.camera.heading,
+              pitch: Cesium.Math.toRadians(-45),
+              roll: 0
+            }
+          });
+
+          setTimeout(() => locationBtn.classList.remove("active-btn"), 1200);
+        },
+        function(error) {
+          locationBtn.classList.remove("active-btn");
+          console.error(error);
+          alert("Current location access allow karo.");
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 10000
+        }
+      );
+    }
+
+    let is2DMode = false;
+
+    function toggle2D3D() {
+      if (!is2DMode) {
+        viewer.scene.morphTo2D(1.0);
+        is2DMode = true;
+        modeLabel.innerHTML = "2D Mode";
+        modeToggleBtn.classList.add("active-btn");
+      } else {
+        viewer.scene.morphTo3D(1.0);
+        is2DMode = false;
+        modeLabel.innerHTML = "3D Mode";
+        modeToggleBtn.classList.remove("active-btn");
+      }
+    }
+
+    function updateNorthArrow() {
+      const heading = viewer.camera.heading;
+      const degrees = Cesium.Math.toDegrees(heading);
+      northArrow.style.transform = `rotate(${-degrees}deg)`;
+    }
+
+    viewer.camera.changed.addEventListener(function() {
+      updateNorthArrow();
+    });
+
     const handler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
 
     handler.setInputAction(function(click) {
+      const clickedPosition = getPositionFromScreen(click.position);
+
+      if (measureMode) {
+        if (!clickedPosition) return;
+
+        if (measurePositions.length === 0) {
+          measurePositions.push(clickedPosition);
+          createPoint(clickedPosition);
+
+          const dynamicPositions = new Cesium.CallbackProperty(function() {
+            return measurePositions;
+          }, false);
+
+          activeShape = drawShape(dynamicPositions);
+          measureInfoContent.innerHTML = "First point added<br>Second point click karein";
+        } else {
+          if (measurePositions.length > 1) {
+            measurePositions[measurePositions.length - 1] = clickedPosition;
+          } else {
+            measurePositions.push(clickedPosition);
+          }
+
+          createPoint(clickedPosition);
+          const finalDistance = calculateDistance(measurePositions);
+          addDistanceLabel(clickedPosition, formatDistance(finalDistance));
+          measurePositions.push(clickedPosition.clone());
+
+          measureInfoContent.innerHTML = `
+            Total Distance:<br>
+            <b>${formatDistance(finalDistance)}</b><br>
+            Aur point add kar sakte hain
+          `;
+        }
+        return;
+      }
+
       const pickedObject = viewer.scene.pick(click.position);
 
       if (!Cesium.defined(pickedObject) || !pickedObject.id) {
@@ -455,6 +889,42 @@
 
     }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
 
+    handler.setInputAction(function(movement) {
+      if (!measureMode || measurePositions.length === 0) return;
+
+      const newPosition = getPositionFromScreen(movement.endPosition);
+      if (!newPosition) return;
+
+      if (measurePositions.length === 1) {
+        measurePositions.push(newPosition);
+      } else {
+        measurePositions[measurePositions.length - 1] = newPosition;
+      }
+
+      const previewDistance = calculateDistance(measurePositions);
+      measureInfoContent.innerHTML = `
+        Measuring...<br>
+        <b>${formatDistance(previewDistance)}</b>
+      `;
+    }, Cesium.ScreenSpaceEventType.MOUSE_MOVE);
+
+    handler.setInputAction(function() {
+      if (!measureMode) return;
+
+      if (measurePositions.length > 1) {
+        measurePositions.pop();
+      }
+
+      const finalDistance = calculateDistance(measurePositions);
+
+      measureInfoContent.innerHTML = `
+        Final Distance:<br>
+        <b>${formatDistance(finalDistance)}</b><br>
+        Naya point add kar sakte hain
+      `;
+    }, Cesium.ScreenSpaceEventType.RIGHT_CLICK);
+
+    updateNorthArrow();
     loadGeoJson3D();
   </script>
 </body>
